@@ -1,10 +1,14 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+extern crate winapi;
+
 use tauri::{command, Manager, AppHandle, Window, Builder, WindowEvent, generate_context, generate_handler};
-use std::{thread::{self, sleep}, time::Duration};
+use std::{thread::{self, sleep}, time::Duration, ptr, str};
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::ffi::CString;
 use rdev::{listen, Event, EventType};
 use sysinfo::System;
+use winapi::um::winuser::FindWindowA;
 
 #[derive(Clone, serde::Serialize)]
 struct Payload {
@@ -26,8 +30,17 @@ fn kill_process(name: &str) -> bool {
 }
 
 #[command]
-fn is_process_running(name: &str) -> bool {
-    return System::new_all().processes_by_name(&name).next().is_some();
+fn is_roblox_running() -> bool {
+    let roblox_window_title = CString::new("Roblox").expect("Failed to create CString!");
+    let hwnd = unsafe {
+        FindWindowA(ptr::null(), roblox_window_title.as_ptr())
+    };
+
+    if hwnd.is_null() {
+        false
+    } else {
+        true
+    }
 }
 
 static KEY_EVENTS_INITIALIZED: AtomicBool = AtomicBool::new(false);
@@ -70,7 +83,7 @@ fn main() {
         .plugin(tauri_plugin_single_instance::init(|app, argv, cwd| {
             app.emit_all("single-instance", Payload2 { args: argv, cwd }).unwrap();
         }))
-        .invoke_handler(generate_handler![init_key_events, is_process_running, kill_process, eval])
+        .invoke_handler(generate_handler![init_key_events, is_roblox_running, kill_process, eval])
         .run(generate_context!())
         .expect("Failed to launch application.");
 }

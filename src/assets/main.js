@@ -1505,7 +1505,7 @@ function populateTabs(force) {
 }
 
 async function isRobloxRunning() {
-  return await invoke("is_process_running", { name: "RobloxPlayerBeta" });
+  return await invoke("is_roblox_running");
 }
 
 async function killRoblox() {
@@ -1911,8 +1911,11 @@ async function checkRobloxActive() {
     
     if (newActive) {
       if (!prevConnected && injecting !== true) {
-        if (settings.autoInject && await findExecutable()) inject();
-        else exploitInject.classList.remove("disabled");
+        if (settings.autoInject && await findExecutable()) {
+          setTimeout(() => {
+            inject()
+          }, 2000);
+        } else exploitInject.classList.remove("disabled");
       }
       exploitKill.classList.remove("disabled");
     } else {
