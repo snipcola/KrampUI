@@ -1595,12 +1595,12 @@ async function _import() {
     defaultPath: await path.join(await path.appConfigDir(), "scripts"),
     filters: [
       {
-        name: "LUA Files",
-        extensions: ["lua"]
+        name: "Scripts",
+        extensions: ["lua", "luau", "txt"]
       },
       {
-        name: "Text Files",
-        extensions: ["txt"]
+        name: "All files",
+        extensions: ["*"]
       }
     ]
   });
@@ -1623,12 +1623,12 @@ async function _export() {
     defaultPath: await path.join(await path.appConfigDir(), "scripts"),
     filters: [
       {
-        name: "LUA File",
-        extensions: ["lua"]
+        name: "Scripts",
+        extensions: ["lua", "luau", "txt"]
       },
       {
-        name: "Text File",
-        extensions: ["txt"]
+        name: "All files",
+        extensions: ["*"]
       }
     ]
   });
