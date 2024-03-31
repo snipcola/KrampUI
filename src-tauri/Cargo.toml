@@ -15,6 +15,7 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 sysinfo = "0.30.7"
 rdev = "0.5.3"
+winapi = { version = "0.3", features = ["winuser"] }
 
 [features]
 custom-protocol = ["tauri/custom-protocol"]
