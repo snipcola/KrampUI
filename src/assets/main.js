@@ -66,8 +66,8 @@ async function hide(onlyAnimation) {
   else toggleLock = false;
 }
 
-async function toggle() {
-  if (await isVisible() && settings.keyToggle) await hide();
+async function toggle(force) {
+  if (await isVisible() && (force || settings.keyToggle)) await hide();
   else await show();
 }
 
@@ -1081,6 +1081,11 @@ async function getActiveTabContent() {
   return tab ? await getTabContent(tab) : "";
 }
 
+function getActiveTabName() {
+  const tab = tabs.find((t) => t.active === true);
+  return tab ? getTabName(tab) : "";
+}
+
 async function setActiveTabContent(content) {
   const tab = tabs.find((t) => t.active === true);
   
@@ -1166,7 +1171,7 @@ async function addTab(data, dontLoad) {
   if (dontLoad !== true) populateTabs();
 }
 
-async function deleteTab(id) {
+async function deleteTab(id, onlyFiles) {
   if (tabs.length === 1) return;
   let order = 0;
   
@@ -1183,26 +1188,28 @@ async function deleteTab(id) {
     await deleteFile(`${dataDirectory}/tabs-data/${tab.id}`);
   }
 
-  tabs = tabs
-    .filter(function (t) {
-      return t.id !== id;
-    })
-    .map(function (t) {
-      order = order + 1;
-      if (tab?.active) {
-        if (t.id === newTab?.id) t.active = true;
-        else t.active = false;
-      }
-      t.order = order;
-      return t;
-    });
+  if (!onlyFiles) {
+    tabs = tabs
+      .filter(function (t) {
+        return t.id !== id;
+      })
+      .map(function (t) {
+        order = order + 1;
+        if (tab?.active) {
+          if (t.id === newTab?.id) t.active = true;
+          else t.active = false;
+        }
+        t.order = order;
+        return t;
+      });
 
-  const activeTab = tabs.find((t) => t.active === true);
-  const scroll = activeTab?.scroll;
-  await setTabs();
-  if (editorSetText) editorSetText(await getActiveTabContent());
-  if (editorSetScroll) editorSetScroll(scroll || 0);
-  populateTabs();
+    const activeTab = tabs.find((t) => t.active === true);
+    const scroll = activeTab?.scroll;
+    await setTabs();
+    if (editorSetText) editorSetText(await getActiveTabContent());
+    if (editorSetScroll) editorSetScroll(scroll || 0);
+    populateTabs();
+  }
 }
 
 async function renameTab(id, newName, force) {
@@ -1644,28 +1651,56 @@ async function _import() {
 async function _export() {
   exploitExport.classList.add("disabled");
 
+  const tabName = getActiveTabName();
+  const tabNameSplit = tabName.split(".");
+  const extension = tabNameSplit.length > 1 ? tabNameSplit.pop() : null;
+
+  const filters = [
+    ...(extension ? [{
+      name: "Current File",
+      extensions: [extension]
+    }] : []),
+    {
+      name: "Lua File",
+      extensions: ["lua"]
+    },
+    {
+      name: "LuaU File",
+      extensions: ["luau"]
+    },
+    {
+      name: "Text File",
+      extensions: ["txt"]
+    }
+  ];
+
   const selected = await dialog.save({
     title: "Export Script",
-    defaultPath: await path.join(await path.appConfigDir(), "scripts"),
-    filters: [
-      {
-        name: "Lua File",
-        extensions: ["lua"]
-      },
-      {
-        name: "LuaU File",
-        extensions: ["luau"]
-      },
-      {
-        name: "Text File",
-        extensions: ["txt"]
-      }
-    ]
+    defaultPath: await path.join(await path.appConfigDir(), "scripts", tabName),
+    filters
   });
 
   if (selected) {
     const text = editorGetText() || "";
     await writeFile(selected, text);
+
+    const currentTab = tabs.find((t) => t.active === true);
+
+    if (currentTab && !tabs.find((t) => t.path === selected)) {
+      await deleteTab(currentTab.id, true);
+      tabs = tabs.map(function (t) {
+        if (t.active && !t.path) return {
+          path: selected,
+          order: currentTab.order,
+          active: true,
+          scroll: currentTab.scroll
+        }
+        else return t;
+      });
+      await setTabs();
+      populateTabs();
+    }
+
     exploitExport.classList.remove("disabled");
     loadScripts();
     return true;
@@ -2039,6 +2074,14 @@ window.addEventListener("DOMContentLoaded", async function () {
 
   event.listen("get-credentials", async function () {
     event.emit("set-credentials-login", { ...await getCredentials(), autoLogin: settings.autoLogin });
+  });
+
+  event.listen("exit", async function () {
+    await exit();
+  });
+
+  event.listen("toggle", async function () {
+    await toggle(true);
   });
 
   // Titlebar
