@@ -30,6 +30,11 @@ fn is_roblox_running() -> bool {
     return System::new_all().processes_by_name("RobloxPlayerBeta.exe").next().is_some();
 }
 
+#[command]
+fn log(message: String) {
+    println!("[FRONTEND] {}", message);
+}
+
 static KEY_EVENTS_INITIALIZED: AtomicBool = AtomicBool::new(false);
 
 #[command]
@@ -70,7 +75,7 @@ fn main() {
         .plugin(tauri_plugin_single_instance::init(|app, argv, cwd| {
             app.emit_all("single-instance", Payload2 { args: argv, cwd }).unwrap();
         }))
-        .invoke_handler(generate_handler![init_key_events, is_roblox_running, kill_roblox, eval])
+        .invoke_handler(generate_handler![init_key_events, is_roblox_running, kill_roblox, eval, log])
         .run(generate_context!())
         .expect("Failed to launch application.");
 }
