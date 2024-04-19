@@ -5,9 +5,6 @@
 </div>
 <br />
 
-## Tutorial + Showcase
-Watch a tutorial on how to use it here: https://www.youtube.com/watch?v=VXCyulSeDS0
-
 ## Getting KrampUI
 
 ### [Download the binary](https://github.com/BitdancerStudios/KrampUI/releases/latest),
