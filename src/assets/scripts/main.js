@@ -363,14 +363,8 @@ async function askForExecutable(select) {
   });
 
   if (selected) {
-    const [isKrampusLoader, errorMessage] = await invoke("validate_executable", { executablePath: selected });
-
-    if (isKrampusLoader) {
-      await clearExecutables();
-      await moveBinaryFile(selected, await getExecutable());
-    } else {
-      alert(errorMessage);
-    }
+    await clearExecutables();
+    await moveBinaryFile(selected, await getExecutable());
   }
 
   const executable = await findExecutable();

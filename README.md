@@ -1,3 +1,6 @@
+> **Note**<br/>
+> Project abandoned - don't expect any updates.
+
 <div align="center">
     <h3>KrampUI</h3>
     <p>Simple and lightweight frontend for Ro-Exec.</p>
@@ -7,7 +10,7 @@
 
 ## Getting KrampUI
 
-### [Download the binary](https://github.com/BitdancerStudios/KrampUI/releases/latest),
+### [Download the binary](https://git.snipcola.com/snipcola/KrampUI/releases/latest),
 
 ### or... compile it yourself!
 1. Ensure you have `cargo` (`rustup`), `node`, and `npm` installed.
@@ -34,8 +37,3 @@ It's probably a issue with Ro-Exec. It's advised to wait until you load into gam
 
 ### What is the randomized executable stored in %appdata%/KrampUI?
 That's the loader you've selected. You may delete it or replace it, but it's advised to use the Settings menu instead.
-
-## Found a bug?
-Feel free to let us know, contact one of our team members:
-- [Snipcola](https://discord.com/users/126870350507147264)
-- [swingstuh](https://discord.com/users/352152006867288065)
